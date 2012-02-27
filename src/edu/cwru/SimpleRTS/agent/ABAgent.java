@@ -1,7 +1,6 @@
 package edu.cwru.SimpleRTS.agent;
 
 import java.util.*;
-
 import edu.cwru.SimpleRTS.action.*;
 import edu.cwru.SimpleRTS.environment.State.StateView;
 import edu.cwru.SimpleRTS.model.Direction;
