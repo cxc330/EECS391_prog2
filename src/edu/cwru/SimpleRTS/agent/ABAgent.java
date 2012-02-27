@@ -18,10 +18,11 @@ public class ABAgent extends Agent {
 	static String farm = "Farm";
 	static String barracks = "Barracks";
 	static String footman = "Footman";
+	private int DEPTH = 0;
 
-	public ABAgent(int playernum) {
+	public ABAgent(int playernum, int depth) {
 		super(playernum);
-		// TODO Auto-generated constructor stub
+		DEPTH = depth;
 	}
 
 	@Override
@@ -33,18 +34,18 @@ public class ABAgent extends Agent {
 	@Override
 	public Map<Integer, Action> middleStep(StateView state) {
 		
-		
 		Map<Integer, Action> actions = new HashMap<Integer, Action>();
-		
 		List<Integer> allUnitIds = state.getAllUnitIds();
-		
 		List<Integer> footmanIds = findUnitType(allUnitIds, state, footman);
 		List<Integer> townHallIds = findUnitType(allUnitIds, state, townHall);
 		
 		if(actions == null)
 		{
+			System.out.println("test");
 			actions = new HashMap<Integer, Action>();
+			//actions = alphabeta(origin, DEPTH, -infinity, +infinity, MaxPlayer);
 		}
+		
 		return actions;
 	}
 
@@ -53,6 +54,36 @@ public class ABAgent extends Agent {
 		// TODO Auto-generated method stub
 
 	}
+	
+	public void alphabeta(int node, int depth, int alpha, int beta, int Player)
+	{
+		/*if ( depth == 0  || node == terminal)
+        	return 0; //the heuristic value of node
+        if ( Player == MaxPlayer)
+        {
+        	for (Node childofnode : child)
+            	alpha = max(alpha, alphabeta(child, depth-1, alpha, beta, not(Player)));
+            	if (beta <= alpha)
+            	{
+                	break; //(* Beta cut-off *)
+            	}
+                return alpha;
+        }
+       else
+       {
+    	   for (Node childofnode : child )
+    	   {
+           		beta = min(beta, alphabeta(child, depth-1, alpha, beta, not(Player) )); 
+           		if (beta <= alpha)
+           		{
+           			break; //(* Alpha cut-off *)
+           		}
+    	   }
+    	   return beta;
+       }*/
+	}
+	
+	
 	
 	public List<Integer> findUnitType(List<Integer> ids, StateView state, String name)	{
 		

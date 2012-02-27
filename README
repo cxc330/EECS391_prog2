@@ -3,7 +3,7 @@ Programming Assignment 2
 Professor Soumya Ray
 Created by: Chien-Hung Chen, Christopher Gross
 Contact Emails: cxc330@case.edu, cjg28@case.edu
-Edited: 2/24/2012
+Edited: 2/26/2012
 
 
 In this assignment, we will implement the alpha-beta algorithm for playing two player games to solve two SimpleRTS scenarios. We have been provided in the zipfile provided are two maps and two agents. The maps have two Footmen belonging to player 0 and one or two Archers belonging to player 1. Footmen are melee units and have to be adjacent to another unit to attack it, and they have lots of health. Archers are ranged units that attack at a distance. They do lots of damage but have little health (in these scenarios, they only have 1 health). 
