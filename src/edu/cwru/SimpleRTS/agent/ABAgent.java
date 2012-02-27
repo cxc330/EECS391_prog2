@@ -1,6 +1,7 @@
 package edu.cwru.SimpleRTS.agent;
 
 import java.util.*;
+
 import edu.cwru.SimpleRTS.action.*;
 import edu.cwru.SimpleRTS.environment.State.StateView;
 import edu.cwru.SimpleRTS.model.Direction;
@@ -13,37 +14,55 @@ public class ABAgent extends Agent {
 
 	private static final long serialVersionUID = 1L;
 	static int playernum = 0;
-	static String townHall = "TownHall";
+	static int nInfinity = -9999999;
+	static int pInfinity = 9999999;
+	static String archer = "Archer";
 	static String peasant = "Peasant";
 	static String farm = "Farm";
 	static String barracks = "Barracks";
 	static String footman = "Footman";
 	private int DEPTH = 0;
 
-	public ABAgent(int playernum, int depth) {
+	//Constructor
+	public ABAgent(int playernum, int depth) 
+	{
 		super(playernum);
 		DEPTH = depth;
 	}
 
 	@Override
-	public Map<Integer, Action> initialStep(StateView state) {
-		// TODO Auto-generated method stub
+	public Map<Integer, Action> initialStep(StateView state) 
+	{
 		return middleStep(state);
 	}
 
 	@Override
-	public Map<Integer, Action> middleStep(StateView state) {
+	public Map<Integer, Action> middleStep(StateView state) 
+	{
 		
 		Map<Integer, Action> actions = new HashMap<Integer, Action>();
 		List<Integer> allUnitIds = state.getAllUnitIds();
 		List<Integer> footmanIds = findUnitType(allUnitIds, state, footman);
-		List<Integer> townHallIds = findUnitType(allUnitIds, state, townHall);
+		List<Integer> archerIds = findUnitType(allUnitIds, state, archer);
 		
+		if(footmanIds.size() > 0 || archerIds.size() > 0)
+		{
+			actions = alphabeta(footmanIds.get(0), DEPTH, nInfinity, pInfinity, MaxPlayer);
+		}
+		else
+		{
+			if(footmanIds.size() <= 0)
+			{
+				System.out.println("There's no footmen on the map.");
+			}
+			else if(archerIds.size() <= 0)
+			{
+				System.out.println("There's no archers on the map.");
+			}
+		}
 		if(actions == null)
 		{
-			System.out.println("test");
 			actions = new HashMap<Integer, Action>();
-			//actions = alphabeta(origin, DEPTH, -infinity, +infinity, MaxPlayer);
 		}
 		
 		return actions;
@@ -55,10 +74,12 @@ public class ABAgent extends Agent {
 
 	}
 	
-	public void alphabeta(int node, int depth, int alpha, int beta, int Player)
+	public Map<Integer, Action> alphabeta(Integer node, int depth, int alpha, int beta, int Player)
 	{
-		/*if ( depth == 0  || node == terminal)
-        	return 0; //the heuristic value of node
+		Map<Integer, Action> actions = new HashMap<Integer, Action>();
+		
+		if ( depth == 0  || node == terminal)
+        	return actions; //the heuristic value of node
         if ( Player == MaxPlayer)
         {
         	for (Node childofnode : child)
@@ -80,7 +101,7 @@ public class ABAgent extends Agent {
            		}
     	   }
     	   return beta;
-       }*/
+       }
 	}
 	
 	
