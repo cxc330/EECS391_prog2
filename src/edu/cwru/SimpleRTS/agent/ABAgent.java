@@ -362,12 +362,12 @@ public class ABAgent extends Agent {
 		{
 			UnitView footman = footmen.get(x);
 			UnitView bestMoveUnit = bestMove.get(x);
-			actions.put(footman.getID(), rebuildPath(parents, bestMoveUnit, footman));
+			actions.put(footman.getID(), rebuildPath(parents, bestMoveUnit, footman, state, archers));
 		}
 		return actions;
 	}
 
-	public Action rebuildPath(HashMap<UnitView, UnitView> parentNodes, UnitView goalParent, UnitView startParent)
+	public Action rebuildPath(HashMap<UnitView, UnitView> parentNodes, UnitView goalParent, UnitView startParent, StateView state, ArrayList<UnitView> archers)
 	{
 		ArrayList<UnitView> backwardsPath = new ArrayList<UnitView>(); //The path backwards
 		Action path = null; //The return action
@@ -388,6 +388,10 @@ public class ABAgent extends Agent {
 		{
 			int xDiff = backwardsPath.get(i).getXPosition() - backwardsPath.get(i-1).getXPosition();
 			int yDiff = backwardsPath.get(i).getYPosition() - backwardsPath.get(i-1).getYPosition();
+			
+			if (state.getUnit(archers.get(0).getID()).getXPosition() == backwardsPath.get(i-1).getXPosition() && state.getUnit(archers.get(0).getID()).getXPosition() == backwardsPath.get(i-1).getXPosition())
+				return Action.createCompoundAttack(backwardsPath.get(i).getID(), archers.get(0).getID());
+			
 			System.out.println("FROM (" + backwardsPath.get(i).getXPosition() + ", " + backwardsPath.get(i).getYPosition() + ") to (" + backwardsPath.get(i - 1).getXPosition() + ", " + backwardsPath.get(i-1).getYPosition()+")");
 			Direction d = Direction.EAST; //default value
 
@@ -409,7 +413,7 @@ public class ABAgent extends Agent {
 				d = Direction.WEST;
 			if (i == backwardsPath.size()-1) //only put on the first action
 			{
-				path = Action.createPrimitiveMove(backwardsPath.get(i).getID(), d);
+					path = Action.createPrimitiveMove(backwardsPath.get(i).getID(), d);
 			}
 			System.out.println("Path action: " + backwardsPath.get(i).getXPosition() + ", " + backwardsPath.get(i).getYPosition() + " Direction: " + d.toString());
 		}
@@ -515,7 +519,6 @@ public class ABAgent extends Agent {
 	//returns if a space is empty and valid or if the space is occupied by an archer
 	public boolean checkValidNeighbor(Integer x, Integer y, StateView state, boolean unitDoesntMatter)	
 	{
-
 		boolean isResource = state.isResourceAt(x, y); //check if there is a resource here
 		boolean isUnit = state.isUnitAt(x, y); //check if there is a unit here
 		boolean isValid = state.inBounds(x, y); //check if the square is valid
