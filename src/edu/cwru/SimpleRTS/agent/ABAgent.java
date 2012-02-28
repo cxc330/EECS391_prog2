@@ -76,8 +76,6 @@ public class ABAgent extends Agent {
 
 	
 	//The following three methods should follow the same format
-	//CHRIS: I apologize if I misunderstood you in terms of how to calculate the heuristic. I just used our function which called on chebyshev
-	//		but it needed two UnitViews as inputs, so I assumed the ArrayList was like a path and used it to calculate heuristic, if that's wrong, i'm sorry
 	public ArrayList<UnitView> maxAB(ArrayList<UnitView> a, ArrayList<UnitView> b, ArrayList<UnitView> compareUnit, HashMap<ArrayList<UnitView>, Integer> hCost) //AB are null if they are at infinity
 	{
 		Integer aCost = hCost.get(a);
@@ -299,7 +297,7 @@ public class ABAgent extends Agent {
 				}
 			}
 			if (alpha == null)
-				System.out.println("return a null alpha.. shit");
+				System.out.println("return a null alpha..oops");
 			return alpha;
 		}
 		else
@@ -316,7 +314,7 @@ public class ABAgent extends Agent {
 				}
 			}
 			if (beta == null)
-				System.out.println("return a null beta.. shit");
+				System.out.println("return a null beta..oops");
 			return beta;
 		}
 	}
