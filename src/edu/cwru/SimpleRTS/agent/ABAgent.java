@@ -140,7 +140,6 @@ public class ABAgent extends Agent {
 			{
 				parents.put(child, unit); //add parent nodes to hash map				
 			}
-
 		}
 
 		for (int x = 0; x < validStates.get(0).size(); x++) //fix for recursion only goes two deep now
