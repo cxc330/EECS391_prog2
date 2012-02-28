@@ -25,9 +25,10 @@ public class ABAgent extends Agent {
 	private int DEPTH = 3;
 
 	//Constructor
-	public ABAgent(int playernum) 
+	public ABAgent(int playernum, int dep) 
 	{
 		super(playernum);
+		DEPTH = dep;
 	}
 
 	@Override
