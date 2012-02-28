@@ -22,14 +22,13 @@ public class ABAgent extends Agent {
 	static String farm = "Farm";
 	static String barracks = "Barracks";
 	static String footman = "Footman";
-	private int DEPTH = 3;
+	private int DEPTH = 3; //defaults to 3 but will get overwritten by user
 
 	//Constructor
-	public ABAgent(int playernum) //, String depth)
+	public ABAgent(int playernum, String[] args)
 	{
 		super(playernum);
-		//DEPTH = Integer.parseInt(depth);
-		//System.out.println("#################### " + DEPTH);
+		DEPTH = Integer.parseInt(args[0]);
 	}
 
 	@Override
@@ -84,15 +83,18 @@ public class ABAgent extends Agent {
 		Integer bCost = new Integer(0);		
 		
 		//System.out.println("MAX B: " + b.size() + " C: " + compareUnit.size());
-		for(UnitView unit: b)
+		for(int k=0; k < compareUnit.size(); k++)
 		{
-			bCost += heuristicCostCalculator(unit, compareUnit.get(0)); //update for two archers
-
-			//System.out.println(compareUnit.get(0).getTemplateView().getUnitName().toString());
-			if (compareUnit.get(0).getTemplateView().getUnitName()!= null)
+			for(UnitView unit: b)
 			{
-				if (compareUnit.get(0).getTemplateView().getUnitName().equals("attack"))
-					bCost += 150;
+				bCost += heuristicCostCalculator(unit, compareUnit.get(k)); //update for two archers
+
+				//System.out.println(compareUnit.get(0).getTemplateView().getUnitName().toString());
+				if (compareUnit.get(k).getTemplateView().getUnitName()!= null)
+				{
+					if (compareUnit.get(k).getTemplateView().getUnitName().equals("attack"))
+						bCost += 150;
+				}
 			}
 		}
 		
@@ -130,15 +132,18 @@ public class ABAgent extends Agent {
 		Integer bCost = new Integer(0);		
 
 		//System.out.println("MIN B: " + b.size() + " C: " + compareUnit.size());
-		for(UnitView unit: b)
+		for(int k = 0; k < compareUnit.size(); k++)
 		{
-			bCost += heuristicCostCalculator(unit, compareUnit.get(0)); //update for two archers
-		}
-		
-		if (compareUnit.get(0).getTemplateView().getUnitName()!= null)
-		{
-			//if (compareUnit.get(0).getTemplateView().getUnitName().equals("attack"))
-				//bCost += 50;
+			for(UnitView unit: b)
+			{
+				bCost += heuristicCostCalculator(unit, compareUnit.get(k)); //update for two archers
+			}
+			
+			if (compareUnit.get(k).getTemplateView().getUnitName()!= null)
+			{
+				//if (compareUnit.get(0).getTemplateView().getUnitName().equals("attack"))
+					//bCost += 50;
+			}
 		}
 		
 		hCost.put(b, bCost); //add the cost to the hash
@@ -390,8 +395,11 @@ public class ABAgent extends Agent {
 			int xDiff = backwardsPath.get(i).getXPosition() - backwardsPath.get(i-1).getXPosition();
 			int yDiff = backwardsPath.get(i).getYPosition() - backwardsPath.get(i-1).getYPosition();
 			
-			if (state.getUnit(archers.get(0).getID()).getXPosition() == backwardsPath.get(i-1).getXPosition() && state.getUnit(archers.get(0).getID()).getXPosition() == backwardsPath.get(i-1).getXPosition())
-				return Action.createCompoundAttack(backwardsPath.get(i).getID(), archers.get(0).getID());
+			for(int j = 0; j < archers.size(); j++)
+			{	
+				if (state.getUnit(archers.get(j).getID()).getXPosition() == backwardsPath.get(i-1).getXPosition() && state.getUnit(archers.get(j).getID()).getXPosition() == backwardsPath.get(i-1).getXPosition())
+					return Action.createCompoundAttack(backwardsPath.get(i).getID(), archers.get(j).getID());
+			}
 			
 			System.out.println("FROM (" + backwardsPath.get(i).getXPosition() + ", " + backwardsPath.get(i).getYPosition() + ") to (" + backwardsPath.get(i - 1).getXPosition() + ", " + backwardsPath.get(i-1).getYPosition()+")");
 			Direction d = Direction.EAST; //default value
