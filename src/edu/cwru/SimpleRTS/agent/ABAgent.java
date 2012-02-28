@@ -63,7 +63,7 @@ public class ABAgent extends Agent {
 			}
 		}
 
-		//if(actions == null)
+		if(actions == null)
 		{
 			actions = new HashMap<Integer, Action>();
 		}
@@ -74,32 +74,199 @@ public class ABAgent extends Agent {
 	@Override
 	public void terminalStep(StateView state) {
 		// TODO Auto-generated method stub
-
 	}
 
+	
+	//The following three methods should follow the same format
+	//CHRIS: I apologize if I misunderstood you in terms of how to calculate the heuristic. I just used our function which called on chebyshev
+	//		but it needed two UnitViews as inputs, so I assumed the ArrayList was like a path and used it to calculate heuristic, if that's wrong, i'm sorry
 	public ArrayList<UnitView> maxAB(ArrayList<UnitView> a, ArrayList<UnitView> b) //AB are null if they are at infinity
 	{
-		return null;
+		Integer aCost = new Integer(0);
+		Integer bCost = new Integer(0);
+		
+		for(int i = 1; i < a.size(); i++)
+		{
+			aCost = aCost + heuristicCostCalculator(a.get(i-1), a.get(i));
+		}
+		for(int i = 1; i < b.size(); i++)
+		{
+			bCost = bCost + heuristicCostCalculator(b.get(i-1), b.get(i));
+		}
+		
+		if(aCost >= pInfinity || aCost <= nInfinity || bCost >= pInfinity || bCost <= nInfinity)
+			return null;
+		else
+		{
+			if(aCost >= bCost)
+			{
+				return a;
+			}
+			else
+			{
+				return b;
+			}
+		}
 	}
 
 	public ArrayList<UnitView> minAB(ArrayList<UnitView> a, ArrayList<UnitView> b) //AB are null if they are at infinity
 	{
-		return null;
+		Integer aCost = new Integer(0);
+		Integer bCost = new Integer(0);
+		
+		for(int i = 1; i < a.size(); i++)
+		{
+			aCost = aCost + heuristicCostCalculator(a.get(i-1), a.get(i));
+		}
+		for(int i = 1; i < b.size(); i++)
+		{
+			bCost = bCost + heuristicCostCalculator(b.get(i-1), b.get(i));
+		}
+		
+		if(aCost >= pInfinity || aCost <= nInfinity || bCost >= pInfinity || bCost <= nInfinity)
+			return null;
+		else
+		{
+			if(aCost < bCost)
+			{
+				return a;
+			}
+			else
+			{
+				return b;
+			}
+		}
 	}
 
 	public boolean ABCutOff(ArrayList<UnitView> a, ArrayList<UnitView> b) //AB are null if they are at infinity
 	{
-		return false; //if β ≤ α
+		Integer aCost = new Integer(0);
+		Integer bCost = new Integer(0);
+		
+		for(int i = 1; i < a.size(); i++)
+		{
+			aCost = aCost + heuristicCostCalculator(a.get(i-1), a.get(i));
+		}
+		for(int i = 1; i < b.size(); i++)
+		{
+			bCost = bCost + heuristicCostCalculator(b.get(i-1), b.get(i));
+		}
+		
+		if(aCost >= pInfinity || aCost <= nInfinity || bCost >= pInfinity || bCost <= nInfinity)
+			return false;
+		else
+		{
+			if(bCost <= aCost)
+			{
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
 	}
 
+	
+	
+	//generate all possible neighboring nodes
+	public ArrayList<ArrayList<UnitView>> createStates(ArrayList<UnitView> units, StateView state, HashMap<UnitView, UnitView> parents)
+	{
+		ArrayList <ArrayList<UnitView>> validStates = new ArrayList<ArrayList<UnitView>>(); //the return array of states
+		ArrayList <ArrayList<UnitView>> returnStates = new ArrayList<ArrayList<UnitView>>();
+
+		for (UnitView unit: units) //for each unit in units
+		{
+			validStates.add(getNeighbors(unit, state, false)); // add this unit's neighbors
+
+			for (UnitView child: validStates.get(validStates.size() - 1))
+			{
+				parents.put(child, unit); //add parent nodes to hash map				
+			}
+		}
+
+		//ArrayList <UnitView> listOfUnitsToAdd = new ArrayList <UnitView> ();
+		//returnStates = createStatesRecursive(validStates, listOfUnitsToAdd, 0);
+		
+		if(validStates.size() == 1)
+		{
+			for (int x = 0; x < validStates.get(0).size(); x++)
+			{
+				ArrayList<UnitView> temp = new ArrayList<UnitView>();
+				temp.add(validStates.get(0).get(x));
+				returnStates.add(temp);
+			}
+			return returnStates;
+		}
+		else //if(validStates.size() == 2) //currently defaulting all to this
+		{
+			for (int x = 0; x < validStates.get(0).size(); x++) //fix for recursion only goes two deep now
+			{
+				UnitView xView = validStates.get(0).get(x);
+
+				for (int y = 0; y < validStates.get(1).size(); y++)
+				{
+					ArrayList<UnitView> temp = new ArrayList<UnitView>();
+					temp.add(xView);
+					temp.add(validStates.get(1).get(y));
+					returnStates.add(temp);
+
+				}
+			}
+			return returnStates;
+		}
+	}
+	
+	/*public ArrayList<ArrayList<UnitView>> createStatesRecursive(ArrayList <ArrayList<UnitView>> validStates, ArrayList<UnitView> units, int index )
+	{
+		ArrayList<ArrayList<UnitView>> returnStates = new ArrayList<ArrayList<UnitView>>();
+		
+		//base case
+		if(index == validStates.size() - 1)
+		{
+			for (int y = 0; y < validStates.get(index).size(); y++)
+			{
+				ArrayList<UnitView> temp = new ArrayList<UnitView>();
+				temp.add(xView);
+				temp.add(validStates.get(1).get(y));
+				returnStates.add(temp);
+			}
+		}
+	}*/
+	
+	
+	//checks to see if there is an archer / means to attack because this function is being used as the base class in ABrecurse
+	public boolean checkAttack(ArrayList<UnitView> arr, boolean player)
+	{
+		if(player)
+		{
+			for(int i = 0; i < arr.size(); i++)
+			{
+				if(arr.get(i).getTemplateView().getUnitName().equals(archer))
+					return true;
+			}
+			return false;
+		}
+		else
+		{
+			for(int i = 0; i < arr.size(); i++)
+			{
+				if(arr.get(i).getTemplateView().getUnitName().equals(footman))
+					return true;
+			}
+			return false;
+		}
+	}
+	
+	//recursive AB pruning
 	public ArrayList<UnitView> alphaBetaRecurse(ArrayList<UnitView> node, int depth, ArrayList<UnitView> alpha, ArrayList<UnitView> beta, boolean player, StateView state, HashMap<UnitView, UnitView> parents, ArrayList<UnitView> archers, ArrayList<UnitView> footmen)
 	{		
 		ArrayList<ArrayList<UnitView>> children = createStates(node, state, parents);
 
-		if ( depth == 0 ) // || node == terminal) // Jeff, implement terminal checking... should be based on no neighbors and can only attack
+		if ( depth == 0 || (children.size() == 1 && checkAttack(children.get(0), player))) //should be based on no neighbors and can only attack
 			return node; //don't create anymore children
 
-		if ( player == maxPlayer)
+		if(player == maxPlayer)
 		{
 			for (ArrayList<UnitView> child: children)
 			{
@@ -127,38 +294,8 @@ public class ABAgent extends Agent {
 		}
 	}
 
-	public ArrayList<ArrayList<UnitView>> createStates(ArrayList<UnitView> units, StateView state, HashMap<UnitView, UnitView> parents)
-	{
-		ArrayList <ArrayList<UnitView>> validStates = new ArrayList<ArrayList<UnitView>>(); //the return array of states
-		ArrayList <ArrayList<UnitView>> returnStates = new ArrayList<ArrayList<UnitView>>();
-
-		for (UnitView unit: units) //for all units
-		{
-			validStates.add(getNeighbors(unit, state, false)); // add this unit's neighbors
-
-			for (UnitView child: validStates.get(validStates.size() - 1))
-			{
-				parents.put(child, unit); //add parent nodes to hash map				
-			}
-		}
-
-		for (int x = 0; x < validStates.get(0).size(); x++) //fix for recursion only goes two deep now
-		{
-			UnitView xView = validStates.get(0).get(x);
-
-			for (int y = 0; y < validStates.get(1).size(); y++)
-			{
-				ArrayList<UnitView> temp = new ArrayList<UnitView>();
-				temp.add(xView);
-				temp.add(validStates.get(1).get(y));
-				returnStates.add(temp);
-
-			}
-		}
-		return returnStates;
-	}
-
-	public Map<Integer, Action> alphaBeta(List<Integer> footmenIds, List<Integer> archerIds, StateView state) //sets up a-B search for recursion
+	//sets up a-B search for recursion
+	public Map<Integer, Action> alphaBeta(List<Integer> footmenIds, List<Integer> archerIds, StateView state)
 	{
 		Map<Integer, Action> actions = new HashMap<Integer, Action>();
 		HashMap<UnitView, UnitView> parents = new HashMap<UnitView, UnitView>();
@@ -229,7 +366,7 @@ public class ABAgent extends Agent {
 
 		Integer tempX = 0, tempY = 0;
 
-		for (int j = 0; j < 4; j++) //go through all possible 8 squares
+		for (int j = 0; j < 4; j++) //go through all possible 4 squares
 		{
 			switch(j) //Could use something better but it's too much thinking right now
 			{
@@ -264,17 +401,19 @@ public class ABAgent extends Agent {
 		return neighbors;
 	}
 
-	public Integer heuristicCostCalculator(UnitView a, UnitView b)	{ //Just uses Chebyshev distances
-
+	//Calculating Heuristic with chebyshev
+	public Integer heuristicCostCalculator(UnitView a, UnitView b)
+	{
 		int x1 = a.getXPosition();
 		int x2 = b.getXPosition();
 		int y1 = a.getYPosition();
 		int y2 = b.getYPosition();
-
 		return (DistanceMetrics.chebyshevDistance(x1, y1, x2, y2));
 	}
 
-	public boolean checkValidNeighbor(Integer x, Integer y, StateView state, boolean unitDoesntMatter)	{ //returns if a space is empty and valid
+	//returns if a space is empty and valid or if the space is occupied by an archer
+	public boolean checkValidNeighbor(Integer x, Integer y, StateView state, boolean unitDoesntMatter)	
+	{
 
 		boolean isResource = state.isResourceAt(x, y); //check if there is a resource here
 		boolean isUnit = state.isUnitAt(x, y); //check if there is a unit here
@@ -285,6 +424,17 @@ public class ABAgent extends Agent {
 		if ((isNotTaken || unitDoesntMatter) && isValid) //if there is no resource here and no unit and it's valid it means it's an empty square
 		{
 			return true;
+		}
+		else if(isUnit && isValid && !isResource) //there's a unit, see if we can attack it
+		{
+			if(state.getUnit(state.unitAt(x,y)).getTemplateView().getUnitName().equals(archer)) //it's an archer, we can attack
+			{	
+				return true;
+			}
+			else //not an archer, don't attack (for now...)
+			{
+				return false;
+			}
 		}
 
 		return false;
