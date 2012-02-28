@@ -81,11 +81,19 @@ public class ABAgent extends Agent {
 		Integer aCost = hCost.get(a);
 		Integer bCost = new Integer(0);		
 		
-		System.out.println("MAX B: " + b.size() + " C: " + compareUnit.size());
+		//System.out.println("MAX B: " + b.size() + " C: " + compareUnit.size());
 		for(UnitView unit: b)
 		{
 			bCost += heuristicCostCalculator(unit, compareUnit.get(0)); //update for two archers
+
+			//System.out.println(compareUnit.get(0).getTemplateView().getUnitName().toString());
+			if (compareUnit.get(0).getTemplateView().getUnitName()!= null)
+			{
+				if (compareUnit.get(0).getTemplateView().getUnitName().equals("attack"))
+					bCost += 150;
+			}
 		}
+		
 		
 		hCost.put(b, bCost); //add the cost to the hash
 		
@@ -98,7 +106,7 @@ public class ABAgent extends Agent {
 			}
 			else
 			{
-				if (aCost > bCost)
+				if (aCost >= bCost)
 				{
 					return a;
 				}
@@ -119,10 +127,16 @@ public class ABAgent extends Agent {
 		Integer aCost = hCost.get(a);
 		Integer bCost = new Integer(0);		
 
-		System.out.println("MIN B: " + b.size() + " C: " + compareUnit.size());
+		//System.out.println("MIN B: " + b.size() + " C: " + compareUnit.size());
 		for(UnitView unit: b)
 		{
 			bCost += heuristicCostCalculator(unit, compareUnit.get(0)); //update for two archers
+		}
+		
+		if (compareUnit.get(0).getTemplateView().getUnitName()!= null)
+		{
+			//if (compareUnit.get(0).getTemplateView().getUnitName().equals("attack"))
+				//bCost += 50;
 		}
 		
 		hCost.put(b, bCost); //add the cost to the hash
@@ -136,7 +150,7 @@ public class ABAgent extends Agent {
 			}
 			else
 			{
-				if (aCost < bCost)
+				if (aCost <= bCost)
 				{
 					return a;
 				}
@@ -171,7 +185,7 @@ public class ABAgent extends Agent {
 		{
 			if (aCost <= bCost)
 			{
-				System.out.println("found a cut off");
+				//System.out.println("found a cut off");
 				return true;
 			}
 			else
@@ -274,7 +288,7 @@ public class ABAgent extends Agent {
 	//recursive AB pruning
 	public ArrayList<UnitView> alphaBetaRecurse(ArrayList<UnitView> node, int depth, ArrayList<UnitView> alpha, ArrayList<UnitView> beta, boolean player, StateView state, HashMap<UnitView, UnitView> parents, ArrayList<UnitView> archers, ArrayList<UnitView> footmen, HashMap<ArrayList<UnitView>, Integer> hCost)
 	{		
-		System.out.println("NODE: " + node.size());
+		//System.out.println("NODE: " + node.size());
 		ArrayList<ArrayList<UnitView>> children = createStates(node, state, parents);
 
 		if ( depth == 0 )//|| (children.size() == 1 && checkAttack(children.get(0), player))) //should be based on no neighbors and can only attack
@@ -283,7 +297,7 @@ public class ABAgent extends Agent {
 			return node; //don't create anymore children
 		}
 
-		if(player == maxPlayer)
+		if(player == maxPlayer) //the archer
 		{
 			for (ArrayList<UnitView> child: children)
 			{
@@ -295,6 +309,7 @@ public class ABAgent extends Agent {
 				{
 					break; //Beta cut off
 				}
+				//System.out.println("MAXPLAYER WILL CHOOSE COST OF: " + hCost.get(alpha) + " DEPTH: "  + depth);
 			}
 			if (alpha == null)
 				System.out.println("return a null alpha..oops");
@@ -312,6 +327,7 @@ public class ABAgent extends Agent {
 				{
 					break; //alpha cut off
 				}
+				//System.out.println("MINPLAYER WILL CHOOSE COST OF: " + hCost.get(beta) + " DEPTH: "  + depth);
 			}
 			if (beta == null)
 				System.out.println("return a null beta..oops");
@@ -371,7 +387,7 @@ public class ABAgent extends Agent {
 		{
 			int xDiff = backwardsPath.get(i).getXPosition() - backwardsPath.get(i-1).getXPosition();
 			int yDiff = backwardsPath.get(i).getYPosition() - backwardsPath.get(i-1).getYPosition();
-
+			System.out.println("FROM (" + backwardsPath.get(i).getXPosition() + ", " + backwardsPath.get(i).getYPosition() + ") to (" + backwardsPath.get(i - 1).getXPosition() + ", " + backwardsPath.get(i-1).getYPosition()+")");
 			Direction d = Direction.EAST; //default value
 
 			if(xDiff < 0 && yDiff > 0) //NW
@@ -419,9 +435,10 @@ public class ABAgent extends Agent {
 		return unitIds;
 	}
 
-	public UnitView createOpenSpace(Integer x, Integer y) //creates a dummy UnitView at the requested space
+	public UnitView createOpenSpace(Integer x, Integer y, String name) //creates a dummy UnitView at the requested space
 	{
 		UnitTemplate template = new UnitTemplate(0); //The template, ID 0 is used because we don't care what type it is
+		template.setUnitName(name);
 		Unit unit = new Unit(template, y);	//The actual Unit
 
 		unit.setxPosition(x); //set its x
@@ -472,13 +489,14 @@ public class ABAgent extends Agent {
 				break;
 			}
 
-			UnitView neighbor = createOpenSpace(tempX, tempY); //make a dummy space
+			UnitView neighbor = createOpenSpace(tempX, tempY, "none"); //make a dummy space
 
 			if(checkValidNeighbor(tempX, tempY, state, unitDoesntMatter)) //check if it's a valid space
 			{
 				neighbors.add(neighbor);
 			}
-		}		
+		}
+		neighbors.add(createOpenSpace(x,y, "attack"));
 
 		return neighbors;
 	}
