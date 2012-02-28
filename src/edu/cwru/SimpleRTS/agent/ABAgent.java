@@ -25,10 +25,11 @@ public class ABAgent extends Agent {
 	private int DEPTH = 3;
 
 	//Constructor
-	public ABAgent(int playernum, int dep) 
+	public ABAgent(int playernum) //, String depth)
 	{
 		super(playernum);
-		DEPTH = dep;
+		//DEPTH = Integer.parseInt(depth);
+		//System.out.println("#################### " + DEPTH);
 	}
 
 	@Override
