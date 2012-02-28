@@ -3,8 +3,10 @@ package edu.cwru.SimpleRTS.agent;
 import java.util.*;
 
 import edu.cwru.SimpleRTS.action.*;
+import edu.cwru.SimpleRTS.environment.State;
 import edu.cwru.SimpleRTS.environment.State.StateView;
 import edu.cwru.SimpleRTS.model.Direction;
+import edu.cwru.SimpleRTS.model.Template.TemplateView;
 import edu.cwru.SimpleRTS.model.unit.Unit;
 import edu.cwru.SimpleRTS.model.unit.Unit.UnitView;
 import edu.cwru.SimpleRTS.model.unit.UnitTemplate;
@@ -24,10 +26,9 @@ public class ABAgent extends Agent {
 	private int DEPTH = 0;
 
 	//Constructor
-	public ABAgent(int playernum, int depth) 
+	public ABAgent(int playernum) 
 	{
 		super(playernum);
-		DEPTH = depth;
 	}
 
 	@Override
@@ -45,22 +46,23 @@ public class ABAgent extends Agent {
 		List<Integer> footmanIds = findUnitType(allUnitIds, state, footman);
 		List<Integer> archerIds = findUnitType(allUnitIds, state, archer);
 		
-		if(footmanIds.size() > 0 || archerIds.size() > 0)
+		if(footmanIds.size() > 0 && archerIds.size() > 0)
 		{
-			actions = alphabeta(footmanIds.get(0), DEPTH, nInfinity, pInfinity, MaxPlayer);
+			actions = alphaBeta(footmanIds, archerIds, state);
 		}
 		else
 		{
 			if(footmanIds.size() <= 0)
 			{
-				System.out.println("There's no footmen on the map.");
+				System.out.println("There are no footmen on the map.");
 			}
-			else if(archerIds.size() <= 0)
+			if(archerIds.size() <= 0)
 			{
-				System.out.println("There's no archers on the map.");
+				System.out.println("There are no archers on the map.");
 			}
 		}
-		if(actions == null)
+		
+		//if(actions == null)
 		{
 			actions = new HashMap<Integer, Action>();
 		}
@@ -74,10 +76,8 @@ public class ABAgent extends Agent {
 
 	}
 	
-	public Map<Integer, Action> alphabeta(Integer node, int depth, int alpha, int beta, int Player)
+	public ArrayList<UnitView> alphaBetaRecurse(ArrayList<UnitView>, int depth, ArrayList<UnitView> alpha, ArrayList<UnitView> beta, int Player )
 	{
-		Map<Integer, Action> actions = new HashMap<Integer, Action>();
-		
 		if ( depth == 0  || node == terminal)
         	return actions; //the heuristic value of node
         if ( Player == MaxPlayer)
@@ -104,6 +104,67 @@ public class ABAgent extends Agent {
        }
 	}
 	
+	public ArrayList<ArrayList<UnitView>> createStates(ArrayList<UnitView> units, StateView state, HashMap<UnitView, UnitView> parents)
+	{
+		
+		ArrayList <ArrayList<UnitView>> validStates = new ArrayList<ArrayList<UnitView>>(); //the return array of states
+		ArrayList <ArrayList<UnitView>> returnStates = new ArrayList<ArrayList<UnitView>>();
+		
+		for (UnitView unit: units) //for all units
+		{
+			validStates.add(getNeighbors(unit, state, false)); // add this unit's neighbors
+			
+			for (UnitView child: validStates.get(validStates.size() - 1))
+			{
+				parents.put(child, unit); //add parent nodes to hash map				
+			}
+			
+		}
+		
+		for (int x = 0; x < validStates.get(0).size(); x++) //fix for recursion only goes two deep now
+		{
+			UnitView xView = validStates.get(0).get(x);
+			
+			for (int y = 0; y < validStates.get(1).size(); y++)
+			{
+				ArrayList<UnitView> temp = new ArrayList<UnitView>();
+				temp.add(xView);
+				temp.add(validStates.get(1).get(y));
+				returnStates.add(temp);
+
+			}
+		}
+		return returnStates;
+	}
+	
+	public Map<Integer, Action> alphaBeta(List<Integer> footmenIds, List<Integer> archerIds, StateView state)
+	{
+		Map<Integer, Action> actions = new HashMap<Integer, Action>();
+		HashMap<UnitView, UnitView> parents = new HashMap<UnitView, UnitView>();
+		ArrayList<UnitView> temp = new ArrayList<UnitView>();
+		ArrayList<ArrayList<UnitView>> footmen = new ArrayList<ArrayList<UnitView>>();
+		ArrayList<ArrayList<UnitView>> archers = new ArrayList<ArrayList<UnitView>>();
+		
+		for (Integer ID: footmenIds)
+		{
+			temp.add(state.getUnit(ID));
+		}
+		
+		footmen = createStates(temp, state, parents);
+		temp = new ArrayList<UnitView>();
+		
+		for (Integer ID: archerIds)
+		{
+			temp.add(state.getUnit(ID));
+		}
+		
+		//archers = createStates(temp, state, parents); //JEFF: fix for recursion
+		
+		//alphaBetaRecurse(, DEPTH, DEPTH, DEPTH, DEPTH);
+		return null;
+		
+	}
+	
 	
 	
 	public List<Integer> findUnitType(List<Integer> ids, StateView state, String name)	{
@@ -123,45 +184,11 @@ public class ABAgent extends Agent {
 		
 		return unitIds;
 	}
-		
-	public boolean checkGoal(UnitView neighbor, UnitView goal, StateView state) //checks if we have reached the goal based on if we neighbor the goalSpace
-	{
-		
-		ArrayList<UnitView> units = getNeighbors(neighbor, state, true);
-		
-		Integer x = goal.getXPosition();
-		Integer y = goal.getYPosition();
-		
-		for (UnitView unit : units) //for all neighbors
-		{
-			Integer unitX = unit.getXPosition();
-			Integer unitY = unit.getYPosition();
-			
-			if (x == unitX && y == unitY) //if it's the same as the goal x, y
-			{
-				return true; //we found it!
-			}
-		}
-		
-		return false;
-	}
-	
-	public UnitView checkXYList(ArrayList<UnitView> list, UnitView unit) //Used for checking based on whether or not we all ready have the space of values: x, y
-	{
-		Integer x = unit.getXPosition();
-		Integer y = unit.getYPosition();
-		
-		for (UnitView item : list) //for every item in the list
-		{
-			if (item.getXPosition() == (x) && item.getYPosition() == (y)) //if it's there
-				return item; //return it
-		}
-		return null; //otherwise return nothing
-	}
 	
 	public UnitView createOpenSpace(Integer x, Integer y) //creates a dummy UnitView at the requested space
 	{
 		UnitTemplate template = new UnitTemplate(0); //The template, ID 0 is used because we don't care what type it is
+		template.setUnitName("footman");
 		Unit unit = new Unit(template, y);	//The actual Unit
 		
 		unit.setxPosition(x); //set its x
@@ -188,7 +215,7 @@ public class ABAgent extends Agent {
 		
 		Integer tempX = 0, tempY = 0;
 		
-		for (int j = 0; j < 8; j++) //go through all possible 8 squares
+		for (int j = 0; j < 4; j++) //go through all possible 8 squares
 		{
 			switch(j) //Could use something better but it's too much thinking right now
 			{
@@ -196,33 +223,17 @@ public class ABAgent extends Agent {
 					tempX = xPlusOne;
 					tempY = y;
 					break;
-				case 1: //x + 1, y + 1
-					tempX = xPlusOne;
-					tempY = yPlusOne;
-					break;
-				case 2: //x + 1, y - 1
-					tempX = xPlusOne;
-					tempY = yMinusOne;
-					break;
-				case 3: //x, y + 1
+				case 1: //x, y + 1
 					tempX = x;
 					tempY = yPlusOne;
 					break;
-				case 4: //x, y - 1
+				case 2: //x, y - 1
 					tempX = x;
 					tempY = yMinusOne;
 					break;
-				case 5: //x - 1, y
+				case 3: //x - 1, y
 					tempX = xMinusOne;
 					tempY = y;
-					break;
-				case 6: //x - 1, y + 1
-					tempX = xMinusOne;
-					tempY = yPlusOne;
-					break;
-				case 7: //x - 1, y - 1
-					tempX = xMinusOne;
-					tempY = yMinusOne;
 					break;
 				default:
 					break;
