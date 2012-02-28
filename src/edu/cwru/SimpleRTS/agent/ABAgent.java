@@ -77,17 +77,17 @@ public class ABAgent extends Agent {
 
 	}
 
-	public ArrayList<UnitView> maxAB(ArrayList<UnitView> a, ArrayList<UnitView> b)
+	public ArrayList<UnitView> maxAB(ArrayList<UnitView> a, ArrayList<UnitView> b) //AB are null if they are at infinity
 	{
 		return null;
 	}
 
-	public ArrayList<UnitView> minAB(ArrayList<UnitView> a, ArrayList<UnitView> b)
+	public ArrayList<UnitView> minAB(ArrayList<UnitView> a, ArrayList<UnitView> b) //AB are null if they are at infinity
 	{
 		return null;
 	}
 
-	public boolean ABCutOff(ArrayList<UnitView> a, ArrayList<UnitView> b)
+	public boolean ABCutOff(ArrayList<UnitView> a, ArrayList<UnitView> b) //AB are null if they are at infinity
 	{
 		return false; //if β ≤ α
 	}
@@ -129,7 +129,6 @@ public class ABAgent extends Agent {
 
 	public ArrayList<ArrayList<UnitView>> createStates(ArrayList<UnitView> units, StateView state, HashMap<UnitView, UnitView> parents)
 	{
-
 		ArrayList <ArrayList<UnitView>> validStates = new ArrayList<ArrayList<UnitView>>(); //the return array of states
 		ArrayList <ArrayList<UnitView>> returnStates = new ArrayList<ArrayList<UnitView>>();
 
@@ -160,7 +159,7 @@ public class ABAgent extends Agent {
 		return returnStates;
 	}
 
-	public Map<Integer, Action> alphaBeta(List<Integer> footmenIds, List<Integer> archerIds, StateView state)
+	public Map<Integer, Action> alphaBeta(List<Integer> footmenIds, List<Integer> archerIds, StateView state) //sets up a-B search for recursion
 	{
 		Map<Integer, Action> actions = new HashMap<Integer, Action>();
 		HashMap<UnitView, UnitView> parents = new HashMap<UnitView, UnitView>();
@@ -177,12 +176,8 @@ public class ABAgent extends Agent {
 			archers.add(state.getUnit(ID));
 		}
 
-		//archers = createStates(temp, state, parents); //JEFF: fix for recursion
-		
-		ArrayList<UnitView> alpha = null;
-
 		alphaBetaRecurse(archers, DEPTH, null, null, maxPlayer, state, parents, archers, footmen);
-		
+		//NEED TO IMPLEMENT RETRACE ALG... WILL RETURN PARENT MOVE
 		return null;
 	}
 
