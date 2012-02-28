@@ -3,10 +3,8 @@ package edu.cwru.SimpleRTS.agent;
 import java.util.*;
 
 import edu.cwru.SimpleRTS.action.*;
-import edu.cwru.SimpleRTS.environment.State;
 import edu.cwru.SimpleRTS.environment.State.StateView;
 import edu.cwru.SimpleRTS.model.Direction;
-import edu.cwru.SimpleRTS.model.Template.TemplateView;
 import edu.cwru.SimpleRTS.model.unit.Unit;
 import edu.cwru.SimpleRTS.model.unit.Unit.UnitView;
 import edu.cwru.SimpleRTS.model.unit.UnitTemplate;
@@ -24,7 +22,7 @@ public class ABAgent extends Agent {
 	static String farm = "Farm";
 	static String barracks = "Barracks";
 	static String footman = "Footman";
-	private int DEPTH = 0;
+	private int DEPTH = 3;
 
 	//Constructor
 	public ABAgent(int playernum) 
@@ -80,84 +78,100 @@ public class ABAgent extends Agent {
 	//The following three methods should follow the same format
 	//CHRIS: I apologize if I misunderstood you in terms of how to calculate the heuristic. I just used our function which called on chebyshev
 	//		but it needed two UnitViews as inputs, so I assumed the ArrayList was like a path and used it to calculate heuristic, if that's wrong, i'm sorry
-	public ArrayList<UnitView> maxAB(ArrayList<UnitView> a, ArrayList<UnitView> b) //AB are null if they are at infinity
+	public ArrayList<UnitView> maxAB(ArrayList<UnitView> a, ArrayList<UnitView> b, ArrayList<UnitView> compareUnit, HashMap<ArrayList<UnitView>, Integer> hCost) //AB are null if they are at infinity
 	{
-		Integer aCost = new Integer(0);
-		Integer bCost = new Integer(0);
+		Integer aCost = hCost.get(a);
+		Integer bCost = new Integer(0);		
 		
-		for(int i = 1; i < a.size(); i++)
+		for(UnitView unit: b)
 		{
-			aCost = aCost + heuristicCostCalculator(a.get(i-1), a.get(i));
-		}
-		for(int i = 1; i < b.size(); i++)
-		{
-			bCost = bCost + heuristicCostCalculator(b.get(i-1), b.get(i));
+			bCost += heuristicCostCalculator(unit, compareUnit.get(0)); //update for two archers
 		}
 		
-		if(aCost >= pInfinity || aCost <= nInfinity || bCost >= pInfinity || bCost <= nInfinity)
-			return null;
-		else
+		hCost.put(b, bCost); //add the cost to the hash
+		
+		if (a != null) //infinity node
 		{
-			if(aCost >= bCost)
+			if (aCost == null) //should never get this
 			{
-				return a;
+				System.out.println("Error on alpha maxAB... no cost found from hash..");
+				return null;
 			}
 			else
 			{
-				return b;
+				if (aCost > bCost)
+				{
+					return a;
+				}
+				else
+				{
+					return b;
+				}
 			}
 		}
-	}
-
-	public ArrayList<UnitView> minAB(ArrayList<UnitView> a, ArrayList<UnitView> b) //AB are null if they are at infinity
-	{
-		Integer aCost = new Integer(0);
-		Integer bCost = new Integer(0);
-		
-		for(int i = 1; i < a.size(); i++)
-		{
-			aCost = aCost + heuristicCostCalculator(a.get(i-1), a.get(i));
-		}
-		for(int i = 1; i < b.size(); i++)
-		{
-			bCost = bCost + heuristicCostCalculator(b.get(i-1), b.get(i));
-		}
-		
-		if(aCost >= pInfinity || aCost <= nInfinity || bCost >= pInfinity || bCost <= nInfinity)
-			return null;
 		else
 		{
-			if(aCost < bCost)
+			return b;
+		}		
+	}
+
+	public ArrayList<UnitView> minAB(ArrayList<UnitView> a, ArrayList<UnitView> b, ArrayList<UnitView> compareUnit, HashMap<ArrayList<UnitView>, Integer> hCost) //AB are null if they are at infinity
+	{
+		Integer aCost = hCost.get(a);
+		Integer bCost = new Integer(0);		
+
+		for(UnitView unit: b)
+		{
+			bCost += heuristicCostCalculator(unit, compareUnit.get(0)); //update for two archers
+		}
+		
+		hCost.put(b, bCost); //add the cost to the hash
+		
+		if (a != null) //infinity node
+		{
+			if (aCost == null) //should never get this
 			{
-				return a;
+				System.out.println("Error on alpha maxAB... no cost found from hash..");
+				return null;
 			}
 			else
 			{
-				return b;
+				if (aCost < bCost)
+				{
+					return a;
+				}
+				else
+				{
+					return b;
+				}
 			}
 		}
+		else
+		{
+			return b;
+		}		
 	}
 
-	public boolean ABCutOff(ArrayList<UnitView> a, ArrayList<UnitView> b) //AB are null if they are at infinity
+	public boolean ABCutOff(ArrayList<UnitView> a, ArrayList<UnitView> b, HashMap<ArrayList<UnitView>, Integer> hCost) //AB are null if they are at infinity
 	{
-		Integer aCost = new Integer(0);
-		Integer bCost = new Integer(0);
 		
-		for(int i = 1; i < a.size(); i++)
-		{
-			aCost = aCost + heuristicCostCalculator(a.get(i-1), a.get(i));
-		}
-		for(int i = 1; i < b.size(); i++)
-		{
-			bCost = bCost + heuristicCostCalculator(b.get(i-1), b.get(i));
-		}
+		//if β ≤ α
+		Integer aCost = hCost.get(a);
+		Integer bCost = hCost.get(b);
 		
-		if(aCost >= pInfinity || aCost <= nInfinity || bCost >= pInfinity || bCost <= nInfinity)
+		if (a == null) //a = -infinity impossible for B to be less
+		{
 			return false;
+		}
+		else if (b == null) //B = +infinity and a != -infinity impossible for a to be >
+		{
+			return false;
+		}
 		else
 		{
-			if(bCost <= aCost)
+			if (aCost <= bCost)
 			{
+				System.out.println("found a cut off");
 				return true;
 			}
 			else
@@ -210,7 +224,6 @@ public class ABAgent extends Agent {
 					temp.add(xView);
 					temp.add(validStates.get(1).get(y));
 					returnStates.add(temp);
-
 				}
 			}
 			return returnStates;
@@ -259,37 +272,48 @@ public class ABAgent extends Agent {
 	}
 	
 	//recursive AB pruning
-	public ArrayList<UnitView> alphaBetaRecurse(ArrayList<UnitView> node, int depth, ArrayList<UnitView> alpha, ArrayList<UnitView> beta, boolean player, StateView state, HashMap<UnitView, UnitView> parents, ArrayList<UnitView> archers, ArrayList<UnitView> footmen)
+	public ArrayList<UnitView> alphaBetaRecurse(ArrayList<UnitView> node, int depth, ArrayList<UnitView> alpha, ArrayList<UnitView> beta, boolean player, StateView state, HashMap<UnitView, UnitView> parents, ArrayList<UnitView> archers, ArrayList<UnitView> footmen, HashMap<ArrayList<UnitView>, Integer> hCost)
 	{		
 		ArrayList<ArrayList<UnitView>> children = createStates(node, state, parents);
 
 		if ( depth == 0 || (children.size() == 1 && checkAttack(children.get(0), player))) //should be based on no neighbors and can only attack
+		{
+			System.out.println("Found our node.. it is at: (" + node.get(0).getXPosition() + ", " + node.get(0).getYPosition() + ")");
 			return node; //don't create anymore children
+		}
 
 		if(player == maxPlayer)
 		{
 			for (ArrayList<UnitView> child: children)
 			{
-				alpha = maxAB(alpha, alphaBetaRecurse(archers, depth-1, alpha, beta, !player, state, parents, archers, child)); // note we are passing in a new footman
-
-				if (ABCutOff(alpha, beta))
+				//we are at an archer node.. therefore for each new archer move (child) we want to get the possible 
+				//footmen move from this state, thus we want to compare the max move to it's parent move (child)
+				alpha = maxAB(alpha, alphaBetaRecurse(footmen, depth-1, alpha, beta, !player, state, parents, child, footmen, hCost), child, hCost); // note we are passing in a new archer
+				
+				if (ABCutOff(alpha, beta, hCost))
 				{
 					break; //Beta cut off
 				}
 			}
+			if (alpha == null)
+				System.out.println("return a null alpha.. shit");
 			return alpha;
 		}
 		else
 		{
 			for (ArrayList<UnitView> child: children)
 			{
-				beta = minAB(alpha, alphaBetaRecurse(footmen, depth-1, alpha, beta, !player, state, parents, child, footmen)); // note we are passing in a new archer
+				//we are at a footman node.. therefore for each new footman move (child) we want to get the possible 
+				//archer move from this state, thus we want to compare the max move to it's parent move (child)
+				beta = minAB(beta, alphaBetaRecurse(archers, depth-1, alpha, beta, !player, state, parents, footmen, child, hCost), child, hCost); // note we are passing in a new footman
 				
-				if (ABCutOff(alpha, beta))
+				if (ABCutOff(alpha, beta, hCost))
 				{
 					break; //alpha cut off
 				}
 			}
+			if (beta == null)
+				System.out.println("return a null beta.. shit");
 			return beta;
 		}
 	}
@@ -301,6 +325,7 @@ public class ABAgent extends Agent {
 		HashMap<UnitView, UnitView> parents = new HashMap<UnitView, UnitView>();
 		ArrayList<UnitView> footmen = new ArrayList<UnitView>();
 		ArrayList<UnitView> archers = new ArrayList<UnitView>();
+		HashMap<ArrayList<UnitView>, Integer> hCost = new HashMap<ArrayList<UnitView>, Integer>();
 
 		for (Integer ID: footmenIds)
 		{
@@ -312,12 +337,68 @@ public class ABAgent extends Agent {
 			archers.add(state.getUnit(ID));
 		}
 
-		alphaBetaRecurse(archers, DEPTH, null, null, maxPlayer, state, parents, archers, footmen);
-		//NEED TO IMPLEMENT RETRACE ALG... WILL RETURN PARENT MOVE
-		return null;
+		ArrayList<UnitView> bestMove = alphaBetaRecurse(archers, DEPTH, null, null, maxPlayer, state, parents, archers, footmen, hCost);
+		System.out.println("units: " + bestMove.size());
+		
+		for (int x = 0; x < bestMove.size(); x++)
+		{
+			UnitView footman = footmen.get(x);
+			UnitView bestMoveUnit = bestMove.get(x);
+			actions.put(footman.getID(), rebuildPath(parents, bestMoveUnit, footman));
+		}
+		return actions;
 	}
 
+	public Action rebuildPath(HashMap<UnitView, UnitView> parentNodes, UnitView goalParent, UnitView startParent)
+	{
+		ArrayList<UnitView> backwardsPath = new ArrayList<UnitView>(); //The path backwards
+		Action path = null; //The return action
+		backwardsPath.add(goalParent); //add the goal as our first action
 
+		UnitView parentNode = parentNodes.get(goalParent);
+		backwardsPath.add(parentNode);
+
+		//run till we find the starting node
+		while (!parentNode.equals(startParent))
+		{
+			parentNode = parentNodes.get(parentNode);
+			backwardsPath.add(parentNode);
+		}
+
+		//Loops through the path, calculate the direction, and puts it in the Hashmap to return
+		for(int i = (backwardsPath.size()-1); i > 0; i--)
+		{
+			int xDiff = backwardsPath.get(i).getXPosition() - backwardsPath.get(i-1).getXPosition();
+			int yDiff = backwardsPath.get(i).getYPosition() - backwardsPath.get(i-1).getYPosition();
+
+			Direction d = Direction.EAST; //default value
+
+			if(xDiff < 0 && yDiff > 0) //NW
+				d = Direction.NORTHEAST;
+			else if(xDiff == 0 && yDiff > 0) //N
+				d = Direction.NORTH;
+			else if(xDiff > 0 && yDiff > 0) //NE
+				d = Direction.NORTHWEST;
+			else if(xDiff < 0 && yDiff == 0) //E
+				d = Direction.EAST;
+			else if(xDiff < 0 && yDiff < 0) //SE
+				d = Direction.SOUTHEAST;
+			else if(xDiff == 0 && yDiff < 0) //S
+				d = Direction.SOUTH;
+			else if(xDiff > 0 && yDiff < 0) //SW
+				d = Direction.SOUTHWEST;
+			else if(xDiff > 0 && yDiff == 0) //W
+				d = Direction.WEST;
+			if (i == backwardsPath.size()-1) //only put on the first action
+			{
+				path = Action.createPrimitiveMove(backwardsPath.get(i).getID(), d);
+			}
+			System.out.println("Path action: " + backwardsPath.get(i).getXPosition() + ", " + backwardsPath.get(i).getYPosition() + " Direction: " + d.toString());
+		}
+
+		return path;
+
+	}
 
 	public List<Integer> findUnitType(List<Integer> ids, StateView state, String name)	{
 
