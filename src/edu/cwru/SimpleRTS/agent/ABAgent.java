@@ -81,7 +81,7 @@ public class ABAgent extends Agent {
 		Integer aCost = hCost.get(a);
 		Integer bCost = new Integer(0);		
 		
-		//System.out.println("MAX: " + b.size());
+		System.out.println("MAX B: " + b.size() + " C: " + compareUnit.size());
 		for(UnitView unit: b)
 		{
 			bCost += heuristicCostCalculator(unit, compareUnit.get(0)); //update for two archers
@@ -119,7 +119,7 @@ public class ABAgent extends Agent {
 		Integer aCost = hCost.get(a);
 		Integer bCost = new Integer(0);		
 
-		//System.out.println("MIN: " + compareUnit.size());
+		System.out.println("MIN B: " + b.size() + " C: " + compareUnit.size());
 		for(UnitView unit: b)
 		{
 			bCost += heuristicCostCalculator(unit, compareUnit.get(0)); //update for two archers
@@ -306,7 +306,7 @@ public class ABAgent extends Agent {
 			{
 				//we are at a footman node.. therefore for each new footman move (child) we want to get the possible 
 				//archer move from this state, thus we want to compare the max move to it's parent move (child)
-				beta = minAB(beta, alphaBetaRecurse(archers, depth-1, alpha, beta, !player, state, parents, archers, child, hCost), child, hCost); // note we are passing in a new footman
+				beta = minAB(beta, alphaBetaRecurse(archers, depth-1, alpha, beta, !player, state, parents, archers, child, hCost), archers, hCost); // note we are passing in a new footman
 				
 				if (ABCutOff(alpha, beta, hCost))
 				{
@@ -338,7 +338,7 @@ public class ABAgent extends Agent {
 			archers.add(state.getUnit(ID));
 		}
 
-		ArrayList<UnitView> bestMove = alphaBetaRecurse(archers, DEPTH, null, null, maxPlayer, state, parents, archers, footmen, hCost);
+		ArrayList<UnitView> bestMove = alphaBetaRecurse(archers, DEPTH, null, null, true, state, parents, archers, footmen, hCost);
 		System.out.println("units: " + bestMove.size());
 		
 		for (int x = 0; x < bestMove.size(); x++)
