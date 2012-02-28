@@ -204,7 +204,6 @@ public class ABAgent extends Agent {
 	public UnitView createOpenSpace(Integer x, Integer y) //creates a dummy UnitView at the requested space
 	{
 		UnitTemplate template = new UnitTemplate(0); //The template, ID 0 is used because we don't care what type it is
-		template.setUnitName("footman");
 		Unit unit = new Unit(template, y);	//The actual Unit
 
 		unit.setxPosition(x); //set its x
