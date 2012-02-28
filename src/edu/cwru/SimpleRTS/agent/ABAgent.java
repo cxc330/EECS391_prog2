@@ -22,7 +22,7 @@ public class ABAgent extends Agent {
 	static String farm = "Farm";
 	static String barracks = "Barracks";
 	static String footman = "Footman";
-	private int DEPTH = 5;
+	private int DEPTH = 3;
 
 	//Constructor
 	public ABAgent(int playernum) 
@@ -92,7 +92,7 @@ public class ABAgent extends Agent {
 			if (compareUnit.get(0).getTemplateView().getUnitName()!= null)
 			{
 				if (compareUnit.get(0).getTemplateView().getUnitName().equals("attack"))
-					bCost += 50;
+					bCost += 150;
 			}
 		}
 		
@@ -108,7 +108,7 @@ public class ABAgent extends Agent {
 			}
 			else
 			{
-				if (aCost > bCost)
+				if (aCost >= bCost)
 				{
 					return a;
 				}
@@ -137,8 +137,8 @@ public class ABAgent extends Agent {
 		
 		if (compareUnit.get(0).getTemplateView().getUnitName()!= null)
 		{
-			if (compareUnit.get(0).getTemplateView().getUnitName().equals("attack"))
-				bCost += 50;
+			//if (compareUnit.get(0).getTemplateView().getUnitName().equals("attack"))
+				//bCost += 50;
 		}
 		
 		hCost.put(b, bCost); //add the cost to the hash
@@ -152,7 +152,7 @@ public class ABAgent extends Agent {
 			}
 			else
 			{
-				if (aCost < bCost)
+				if (aCost <= bCost)
 				{
 					return a;
 				}
