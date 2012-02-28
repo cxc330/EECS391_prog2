@@ -83,6 +83,7 @@ public class ABAgent extends Agent {
 		Integer aCost = hCost.get(a);
 		Integer bCost = new Integer(0);		
 		
+		//System.out.println("MAX: " + b.size());
 		for(UnitView unit: b)
 		{
 			bCost += heuristicCostCalculator(unit, compareUnit.get(0)); //update for two archers
@@ -120,6 +121,7 @@ public class ABAgent extends Agent {
 		Integer aCost = hCost.get(a);
 		Integer bCost = new Integer(0);		
 
+		//System.out.println("MIN: " + compareUnit.size());
 		for(UnitView unit: b)
 		{
 			bCost += heuristicCostCalculator(unit, compareUnit.get(0)); //update for two archers
@@ -274,11 +276,12 @@ public class ABAgent extends Agent {
 	//recursive AB pruning
 	public ArrayList<UnitView> alphaBetaRecurse(ArrayList<UnitView> node, int depth, ArrayList<UnitView> alpha, ArrayList<UnitView> beta, boolean player, StateView state, HashMap<UnitView, UnitView> parents, ArrayList<UnitView> archers, ArrayList<UnitView> footmen, HashMap<ArrayList<UnitView>, Integer> hCost)
 	{		
+		System.out.println("NODE: " + node.size());
 		ArrayList<ArrayList<UnitView>> children = createStates(node, state, parents);
 
-		if ( depth == 0 || (children.size() == 1 && checkAttack(children.get(0), player))) //should be based on no neighbors and can only attack
+		if ( depth == 0 )//|| (children.size() == 1 && checkAttack(children.get(0), player))) //should be based on no neighbors and can only attack
 		{
-			System.out.println("Found our node.. it is at: (" + node.get(0).getXPosition() + ", " + node.get(0).getYPosition() + ")");
+			//System.out.println("Found our node.. it is at: (" + node.get(0).getXPosition() + ", " + node.get(0).getYPosition() + ")");
 			return node; //don't create anymore children
 		}
 
@@ -305,7 +308,7 @@ public class ABAgent extends Agent {
 			{
 				//we are at a footman node.. therefore for each new footman move (child) we want to get the possible 
 				//archer move from this state, thus we want to compare the max move to it's parent move (child)
-				beta = minAB(beta, alphaBetaRecurse(archers, depth-1, alpha, beta, !player, state, parents, footmen, child, hCost), child, hCost); // note we are passing in a new footman
+				beta = minAB(beta, alphaBetaRecurse(archers, depth-1, alpha, beta, !player, state, parents, archers, child, hCost), child, hCost); // note we are passing in a new footman
 				
 				if (ABCutOff(alpha, beta, hCost))
 				{
