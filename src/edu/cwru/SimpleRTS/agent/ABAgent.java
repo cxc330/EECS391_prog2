@@ -75,7 +75,6 @@ public class ABAgent extends Agent {
 		// TODO Auto-generated method stub
 	}
 
-	
 	//The following three methods should follow the same format
 	public ArrayList<UnitView> maxAB(ArrayList<UnitView> a, ArrayList<UnitView> b, ArrayList<UnitView> compareUnit, HashMap<ArrayList<UnitView>, Integer> hCost) //AB are null if they are at infinity
 	{
@@ -98,12 +97,12 @@ public class ABAgent extends Agent {
 			}
 		}
 		
-		
-		hCost.put(b, bCost); //add the cost to the hash
+		//add the cost to the hash
+		hCost.put(b, bCost);
 		
 		if (a != null) //infinity node
 		{
-			if (aCost == null) //should never get this
+			if (aCost == null) //should not be reached
 			{
 				System.out.println("Error on alpha maxAB... no cost found from hash..");
 				return null;
@@ -111,13 +110,9 @@ public class ABAgent extends Agent {
 			else
 			{
 				if (aCost >= bCost)
-				{
 					return a;
-				}
 				else
-				{
 					return b;
-				}
 			}
 		}
 		else
@@ -158,13 +153,9 @@ public class ABAgent extends Agent {
 			else
 			{
 				if (aCost <= bCost)
-				{
 					return a;
-				}
 				else
-				{
 					return b;
-				}
 			}
 		}
 		else
@@ -222,6 +213,8 @@ public class ABAgent extends Agent {
 
 		//ArrayList <UnitView> listOfUnitsToAdd = new ArrayList <UnitView> ();
 		//returnStates = createStatesRecursive(validStates, listOfUnitsToAdd, 0);
+
+		//ArrayList<UnitView> temp = new ArrayList<UnitView>();
 		
 		if(validStates.size() == 1)
 		{
