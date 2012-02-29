@@ -206,7 +206,7 @@ public class ABAgent extends Agent {
 
 			for (UnitView child: validStates.get(validStates.size() - 1))
 			{
-				parents.put(child, unit); //add parent nodes to hash map				
+				parents.put(child, unit); //add parent nodes to hash map	
 			}
 		}
 
@@ -240,32 +240,10 @@ public class ABAgent extends Agent {
 		}
 	}
 	
-	
-	//checks to see if there is an archer / means to attack because this function is being used as the base class in ABrecurse
-	public boolean checkAttack(ArrayList<UnitView> arr, boolean player)
-	{
-		if(player)
-		{
-			for(int i = 0; i < arr.size(); i++)
-			{
-				if(arr.get(i).getTemplateView().getUnitName().equals(archer))
-					return true;
-			}
-			return false;
-		}
-		else
-		{
-			for(int i = 0; i < arr.size(); i++)
-			{
-				if(arr.get(i).getTemplateView().getUnitName().equals(footman))
-					return true;
-			}
-			return false;
-		}
-	}
-	
 	//recursive AB pruning
-	public ArrayList<UnitView> alphaBetaRecurse(ArrayList<UnitView> node, int depth, ArrayList<UnitView> alpha, ArrayList<UnitView> beta, boolean player, StateView state, HashMap<UnitView, UnitView> parents, ArrayList<UnitView> archers, ArrayList<UnitView> footmen, HashMap<ArrayList<UnitView>, Integer> hCost)
+	public ArrayList<UnitView> alphaBetaRecurse(ArrayList<UnitView> node, int depth, ArrayList<UnitView> alpha, ArrayList<UnitView> beta, boolean player, StateView state, 
+			HashMap<UnitView, UnitView> parents, ArrayList<UnitView> archers, ArrayList<UnitView> footmen, 
+			HashMap<ArrayList<UnitView>, Integer> hCost, HashMap<ArrayList<UnitView>, ArrayList<UnitView>> archerToFootman)
 	{		
 		//System.out.println("NODE: " + node.size());
 		ArrayList<ArrayList<UnitView>> children = createStates(node, state, parents);
@@ -273,6 +251,7 @@ public class ABAgent extends Agent {
 		if ( depth == 0 )//|| (children.size() == 1 && checkAttack(children.get(0), player))) //should be based on no neighbors and can only attack
 		{
 			//System.out.println("Found our node.. it is at: (" + node.get(0).getXPosition() + ", " + node.get(0).getYPosition() + ")");
+			archerToFootman.put(node, footmen);
 			return node; //don't create anymore children
 		}
 
@@ -282,7 +261,8 @@ public class ABAgent extends Agent {
 			{
 				//we are at an archer node.. therefore for each new archer move (child) we want to get the possible 
 				//footmen move from this state, thus we want to compare the max move to it's parent move (child)
-				alpha = maxAB(alpha, alphaBetaRecurse(footmen, depth-1, alpha, beta, !player, state, parents, child, footmen, hCost), child, hCost); // note we are passing in a new archer
+				archerToFootman.put(child, footmen);
+				alpha = maxAB(alpha, alphaBetaRecurse(footmen, depth-1, alpha, beta, !player, state, parents, child, footmen, hCost, archerToFootman), child, hCost); // note we are passing in a new archer
 				
 				if (ABCutOff(alpha, beta, hCost))
 				{
@@ -300,7 +280,7 @@ public class ABAgent extends Agent {
 			{
 				//we are at a footman node.. therefore for each new footman move (child) we want to get the possible 
 				//archer move from this state, thus we want to compare the max move to it's parent move (child)
-				beta = minAB(beta, alphaBetaRecurse(archers, depth-1, alpha, beta, !player, state, parents, archers, child, hCost), archers, hCost); // note we are passing in a new footman
+				beta = minAB(beta, alphaBetaRecurse(archers, depth-1, alpha, beta, !player, state, parents, archers, child, hCost, archerToFootman), archers, hCost); // note we are passing in a new footman
 				
 				if (ABCutOff(alpha, beta, hCost))
 				{
@@ -322,6 +302,7 @@ public class ABAgent extends Agent {
 		ArrayList<UnitView> footmen = new ArrayList<UnitView>();
 		ArrayList<UnitView> archers = new ArrayList<UnitView>();
 		HashMap<ArrayList<UnitView>, Integer> hCost = new HashMap<ArrayList<UnitView>, Integer>();
+		HashMap<ArrayList<UnitView>, ArrayList<UnitView>> archerToFootman = new HashMap<ArrayList<UnitView>, ArrayList<UnitView>>();
 
 		for (Integer ID: footmenIds)
 		{
@@ -333,8 +314,17 @@ public class ABAgent extends Agent {
 			archers.add(state.getUnit(ID));
 		}
 
-		ArrayList<UnitView> bestMove = alphaBetaRecurse(archers, DEPTH, null, null, true, state, parents, archers, footmen, hCost);
-		System.out.println("units: " + bestMove.size());
+		ArrayList<UnitView> bestMove = alphaBetaRecurse(archers, DEPTH, null, null, true, state, parents, archers, footmen, hCost, archerToFootman);
+
+		if (DEPTH %2 == 0 || DEPTH == 1)
+		{
+			bestMove = archerToFootman.get(bestMove);
+			if (DEPTH == 1)
+				for (int x = 0; x < bestMove.size(); x++)
+				{
+					parents.put(bestMove.get(x), footmen.get(x));
+				}
+		}
 		
 		for (int x = 0; x < bestMove.size(); x++)
 		{
@@ -352,6 +342,7 @@ public class ABAgent extends Agent {
 		backwardsPath.add(goalParent); //add the goal as our first action
 
 		UnitView parentNode = parentNodes.get(goalParent);
+		
 		backwardsPath.add(parentNode);
 
 		//run till we find the starting node
@@ -360,7 +351,7 @@ public class ABAgent extends Agent {
 			parentNode = parentNodes.get(parentNode);
 			backwardsPath.add(parentNode);
 		}
-		//System.out.println("######### " + backwardsPath.size());
+		
 		//Loops through the path, calculate the direction, and puts it in the Hashmap to return
 		for(int i = (backwardsPath.size()-1); i > 0; i--)
 		{
