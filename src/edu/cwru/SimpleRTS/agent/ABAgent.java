@@ -194,7 +194,6 @@ public class ABAgent extends Agent {
 	}
 
 	
-	
 	//generate all possible neighboring nodes
 	public ArrayList<ArrayList<UnitView>> createStates(ArrayList<UnitView> units, StateView state, HashMap<UnitView, UnitView> parents)
 	{
@@ -210,9 +209,6 @@ public class ABAgent extends Agent {
 				parents.put(child, unit); //add parent nodes to hash map				
 			}
 		}
-
-		//ArrayList <UnitView> listOfUnitsToAdd = new ArrayList <UnitView> ();
-		//returnStates = createStatesRecursive(validStates, listOfUnitsToAdd, 0);
 
 		//ArrayList<UnitView> temp = new ArrayList<UnitView>();
 		
@@ -243,23 +239,6 @@ public class ABAgent extends Agent {
 			return returnStates;
 		}
 	}
-	
-	/*public ArrayList<ArrayList<UnitView>> createStatesRecursive(ArrayList <ArrayList<UnitView>> validStates, ArrayList<UnitView> units, int index )
-	{
-		ArrayList<ArrayList<UnitView>> returnStates = new ArrayList<ArrayList<UnitView>>();
-		
-		//base case
-		if(index == validStates.size() - 1)
-		{
-			for (int y = 0; y < validStates.get(index).size(); y++)
-			{
-				ArrayList<UnitView> temp = new ArrayList<UnitView>();
-				temp.add(xView);
-				temp.add(validStates.get(1).get(y));
-				returnStates.add(temp);
-			}
-		}
-	}*/
 	
 	
 	//checks to see if there is an archer / means to attack because this function is being used as the base class in ABrecurse
@@ -381,7 +360,7 @@ public class ABAgent extends Agent {
 			parentNode = parentNodes.get(parentNode);
 			backwardsPath.add(parentNode);
 		}
-
+		//System.out.println("######### " + backwardsPath.size());
 		//Loops through the path, calculate the direction, and puts it in the Hashmap to return
 		for(int i = (backwardsPath.size()-1); i > 0; i--)
 		{
