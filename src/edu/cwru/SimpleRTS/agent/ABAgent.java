@@ -1,3 +1,9 @@
+/******
+ * ABAgent.java
+ * Created by Chien-Hung Chen and Christopher Gross
+ * Prog2 for EECS391
+ */
+
 package edu.cwru.SimpleRTS.agent;
 
 import java.util.*;
@@ -29,8 +35,8 @@ public class ABAgent extends Agent {
 	{
 		super(playernum);
 		DEPTH = Integer.parseInt(args[0]);
-		//if(DEPTH > 3) //For now because anything greater runs out of memory
-			//DEPTH = 3;
+		if(DEPTH > 3) //For now because for the 2 archer map, anything greater than 3 runs out of memory
+			DEPTH = 3; //However, for the 1 archer map, you can run it for high ply, but behavior is weird
 	}
 
 	@Override
@@ -235,9 +241,7 @@ public class ABAgent extends Agent {
 					ArrayList<UnitView> temp = new ArrayList<UnitView>();
 					temp.add(xView);
 					temp.add(validStates.get(1).get(y));
-					System.out.println("XVIEW: " + xView);
 					returnStates.add(temp);
-					System.out.println("returnSTATE: " + returnStates.get(0).get(0));
 				}
 			}
 			return returnStates;

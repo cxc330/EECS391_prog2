@@ -6,7 +6,7 @@ Contact Emails: cxc330@case.edu, cjg28@case.edu
 Edited: 2/28/2012
 
 
-In this assignment, we will implement the alpha-beta algorithm for playing two player games to solve two SimpleRTS scenarios. We have been provided in the zipfile provided are two maps and two agents. The maps have two Footmen belonging to player 0 and one or two Archers belonging to player 1. Footmen are melee units and have to be adjacent to another unit to attack it, and they have lots of health. Archers are ranged units that attack at a distance. They do lots of damage but have little health (in these scenarios, they only have 1 health). 
+In this assignment, we will implement the alpha-beta algorithm for playing two player games to solve two SimpleRTS scenarios. We have been provided with two maps and two agents. The maps have two Footmen belonging to player 0 and one or two Archers belonging to player 1. Footmen are melee units and have to be adjacent to another unit to attack it, and they have lots of health. Archers are ranged units that attack at a distance. They do lots of damage but have little health (in these scenarios, they only have 1 health). 
 
 In these scenarios, our agent will control the Footmen while one of the provided agents, AdversaryAgent, will control the Archers. The other agent in the src folder, GameAgent, is for demonstration purposes only and can be used to control the Footmen to get a sense for how the scenarios play.
 
@@ -21,7 +21,18 @@ and so should be expanded last.  If adjacent to an Archer, a Footman should alwa
 Similarly, if the Archer(s) is (are) very far away from your Footmen, they will not run but shoot your Footmen, so expand that action first, and so forth. 
 
 Code and Data Structures
-You can create either one or two agents corresponding to the two scenarios given. Call your agents ABAgent1 and ABAgent2 (if you just have one, call it ABAgent).  Remember to have SimpleRTS.jar in the classpath when you compile these. To implement the search, it is fine to use basic data structures, such as arrays and lists, to keep track of what you need. Since the game tree is large, you will need to be somewhat efficient in writing your code. The more efficient you are, the deeper you will be able to search! We may give bonus points for efficient code that is able to search large trees quickly.
+We created an agent that utilizes alpha-beta pruning as mentioned, which we called ABAgent. We have included two .sh files for you to run this program.
 
-What to turn in
-Prepare a ZIP file with your agent code (do not include any class files). Include a README with your name(s) and ID(s) and any other comments you have, such as special compilation instructions if any. Name your file as “yourname_PA2.zip” and use Blackboard to submit it. 
+
+Running Instructions:
+In order to run, you may just type ./onearchermap.sh or ./twoarchersmap.sh to streamline the compilation and running process.
+
+onearchermap.sh will compile our ABAgent.java file and run the ABAgent with a depth of 3 on the one archer map (game_2fv1a.map).
+twoarchersmap.sh will compile our ABAgent.java file and run the ABAgent with a depth of 3 on the two archers map (game_2fv2a.map).
+
+Of course you may either go in to edit the .sh files with your own depth, and/or you can run it directly in the command line as such:
+
+To compile ABAgent.java: javac -cp 'lib/SimpleRTSv3.1.jar' src/edu/cwru/SimpleRTS/agent/ABAgent.java
+
+To run: java -cp lib/SimpleRTSv3.1.jar:src/edu/cwru/SimpleRTS/agent:src edu.cwru.SimpleRTS.Main --config data/proj2Config.xml data/game_2fv1a.map --agent  edu.cwru.SimpleRTS.agent.ABAgent 0 --agentparam 3 --agent AdversaryAgent 1 --agent edu.cwru.SimpleRTS.agent.visual.VisualAgent 0 --agentparam true --agentparam true
+where game_2fv1a.map can be change to the two archer map, and ABAgent's agentparam (currently 3) can be changed to a different number
