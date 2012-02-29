@@ -29,6 +29,8 @@ public class ABAgent extends Agent {
 	{
 		super(playernum);
 		DEPTH = Integer.parseInt(args[0]);
+		//if(DEPTH > 3) //For now because anything greater runs out of memory
+			//DEPTH = 3;
 	}
 
 	@Override
