@@ -206,7 +206,7 @@ public class ABAgent extends Agent {
 
 			for (UnitView child: validStates.get(validStates.size() - 1))
 			{
-				parents.put(child, unit); //add parent nodes to hash map				
+				parents.put(child, unit); //add parent nodes to hash map
 			}
 		}
 
@@ -233,7 +233,9 @@ public class ABAgent extends Agent {
 					ArrayList<UnitView> temp = new ArrayList<UnitView>();
 					temp.add(xView);
 					temp.add(validStates.get(1).get(y));
+					System.out.println("XVIEW: " + xView);
 					returnStates.add(temp);
+					System.out.println("returnSTATE: " + returnStates.get(0).get(0));
 				}
 			}
 			return returnStates;
@@ -269,6 +271,7 @@ public class ABAgent extends Agent {
 	{		
 		//System.out.println("NODE: " + node.size());
 		ArrayList<ArrayList<UnitView>> children = createStates(node, state, parents);
+		
 
 		if ( depth == 0 )//|| (children.size() == 1 && checkAttack(children.get(0), player))) //should be based on no neighbors and can only attack
 		{
@@ -360,7 +363,7 @@ public class ABAgent extends Agent {
 			parentNode = parentNodes.get(parentNode);
 			backwardsPath.add(parentNode);
 		}
-		//System.out.println("######### " + backwardsPath.size());
+		
 		//Loops through the path, calculate the direction, and puts it in the Hashmap to return
 		for(int i = (backwardsPath.size()-1); i > 0; i--)
 		{
